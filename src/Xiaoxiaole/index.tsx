@@ -1,41 +1,34 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import Xiaoxiaole, { ChessBoard } from './Xiaoxiaole'
+import Xiaoxiaole, { ChessBoard, Piece } from './Xiaoxiaole'
 import Item from './Item'
 
-export const row = 5
-export const col = 5
+export const row = 6
+export const col = 6
 
 const _Xiaoxiaole = () => {
-    const [xiaoxiaole] = useState(new Xiaoxiaole({ row, col }))
-
-    const chessBoard: ChessBoard = useMemo(() => {
-        return xiaoxiaole.chessBoard
-    }, [xiaoxiaole.chessBoard])
+    const [chessBoard, setChessBoard] = useState<ChessBoard>([])
 
     useEffect(() => {
-        window.xiaoxiaole = xiaoxiaole
-    }, [xiaoxiaole])
+        if (window.xiaoxiaole) {
+            return
+        }
+        window.xiaoxiaole = new Xiaoxiaole({
+            row,
+            col,
+            handleChessboardChange: setChessBoard,
+            handleGameOver: () => alert('游戏结束')
+        })
+    }, [])
 
     return (
         <div>
             <h1 className="text-center text-[40px] mb-[100px]">消消乐</h1>
-            <div className="overflow-hidden mx-auto  w-[250px]">
-                {chessBoard.map((row: (number | null)[], rowIndex: number) => {
-                    return (
-                        <div key={row + ',' + rowIndex} id={row + ',' + rowIndex} className="flex">
-                            {row.map((col: number | null, colIndex: number) => {
-                                return (
-                                    <Item
-                                        key={col + ',' + colIndex}
-                                        col={col}
-                                        rowIndex={rowIndex}
-                                        colIndex={colIndex}
-                                    />
-                                )
-                            })}
-                        </div>
-                    )
+            <div className="overflow-hidden mx-auto flex flex-wrap" style={{ width: row * 50 }}>
+                {chessBoard.map((row: Piece[], rowIndex: number) => {
+                    return row.map((col: Piece, colIndex: number) => {
+                        return <Item key={col.id} col={col} rowIndex={rowIndex} colIndex={colIndex} />
+                    })
                 })}
             </div>
         </div>
