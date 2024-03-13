@@ -1,3 +1,3 @@
 declare interface Window {
-    xiaoxiaole: MatchGame
+    xiaoxiaole: Xiaoxiaole
 }

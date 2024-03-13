@@ -4,7 +4,7 @@ interface IOptions {
     handleChessboardChange: (arr: ChessBoard) => void
     handleGameOver: () => void
 }
-export type Piece = { id: number; value: number | null }
+export type Piece = { id: number; value: number | null; rowIndex?: number; colIndex?: number }
 export type ChessBoard = Piece[][]
 
 export const colors = ['red', 'green', 'blue', 'orange', 'purple']
@@ -117,6 +117,22 @@ export default class Xiaoxiaole {
 
         return true
     }
+
+    /**
+     * 检查交换后是否能进行消除
+     */
+    checkCanMatch(pos: number[][]) {
+        let matches: number[][] = []
+        for (const [row, col] of pos) {
+            // 横向匹配
+            const cols = this.checkMatch(row, col, true)
+            // 纵向匹配
+            const rows = this.checkMatch(row, col, false)
+            matches = matches.concat(cols, rows)
+        }
+        return matches.length > 0
+    }
+
     /**
      * 检查消除
      */
