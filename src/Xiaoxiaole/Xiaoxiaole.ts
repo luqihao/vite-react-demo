@@ -3,6 +3,7 @@ interface IOptions {
     col: number
     handleChessboardChange: (arr: ChessBoard) => void
     handleGameOver: () => void
+    handleRemovePiece: (list: ChessBoard, pos: number[]) => void
 }
 export type Piece = { id: number; value: number | null; rowIndex?: number; colIndex?: number }
 export type ChessBoard = Piece[][]
@@ -30,14 +31,15 @@ export default class Xiaoxiaole {
     col: number = 0
     handleChessboardChange: (arr: ChessBoard) => void
     handleGameOver = () => console.log('游戏结束')
+    handleRemovePiece: (list: ChessBoard, pos: number[]) => void
     index: number = 1
 
-    constructor({ row, col, handleChessboardChange, handleGameOver }: IOptions) {
+    constructor({ row, col, handleChessboardChange, handleGameOver, handleRemovePiece }: IOptions) {
         this.row = row
         this.col = col
         this.handleChessboardChange = handleChessboardChange
         this.handleGameOver = handleGameOver
-
+        this.handleRemovePiece = handleRemovePiece
         this.initChessBoard(row, col)
     }
 
@@ -185,12 +187,18 @@ export default class Xiaoxiaole {
         }
 
         // 消除
+        console.table([...arr].map(v => v.map(v => v.id)))
+        console.log('matches', matches)
         for (const [row, col] of matches) {
-            arr[row][col].value = null
+            this.handleRemovePiece?.(arr, [row, col])
+            setTimeout(() => {
+                arr[row][col].value = null
+            }, 500)
         }
 
         this.chessBoard = arr as ChessBoard
         this.handleChessboardChange(arr as ChessBoard)
+        return
         console.log('消除后')
         console.table([...arr].map(v => v.map(v => v.value)))
         const movedPos = [...this.movePiecesDown(), ...this.refillAndCheck()]
