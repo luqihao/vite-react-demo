@@ -21,14 +21,6 @@ function clone2DArray(arr: unknown[][]): ChessBoard {
     return clone as ChessBoard
 }
 
-export function wait(time = 0): Promise<void> {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve()
-        }, time)
-    })
-}
-
 export default class Xiaoxiaole {
     // 棋子数据
     chessPieces: number[] = [1, 2, 3, 4, 5]
@@ -37,7 +29,7 @@ export default class Xiaoxiaole {
     row: number = 0
     col: number = 0
     handleChessboardChange: (arr: ChessBoard) => void
-    handleGameOver = () => alert('游戏结束')
+    handleGameOver = () => console.log('游戏结束')
     index: number = 1
 
     constructor({ row, col, handleChessboardChange, handleGameOver }: IOptions) {
@@ -89,60 +81,81 @@ export default class Xiaoxiaole {
         return this.chessPieces[randomIndex]
     }
 
-    /**
-     * 交换两个下标内容
-     */
-    swapPiece([row1, col1]: [number, number], [row2, col2]: [number, number]) {
-        if (this.chessBoard[row1][col1] === this.chessBoard[row2][col2]) {
-            console.log('棋子相同，不进行交换')
-            return false
-        }
-
-        const arr = clone2DArray(this.chessBoard)
+    swapPiece(list: ChessBoard, [row1, col1]: [number, number], [row2, col2]: [number, number]) {
+        const arr = clone2DArray(list)
         const temp = arr[row1][col1]
         arr[row1][col1] = arr[row2][col2]
         arr[row2][col2] = temp
-        this.chessBoard = arr as ChessBoard
-        this.handleChessboardChange(arr as ChessBoard)
-
-        console.log('交换后')
-        console.table([...arr].map(v => v.map(v => v.value)))
-        this.checkAndRemoveMatchesAt(
-            [
-                [row1, col1],
-                [row2, col2]
-            ] as unknown as number[][],
-            true
-        )
-
-        return true
+        return arr
     }
 
     /**
      * 检查交换后是否能进行消除
      */
-    checkCanMatch(pos: number[][]) {
+    checkMatchedPieces(list: ChessBoard, pos: number[][]): number[][] {
         let matches: number[][] = []
         for (const [row, col] of pos) {
             // 横向匹配
-            const cols = this.checkMatch(row, col, true)
+            const cols = this.checkMatch(list, row, col, true)
             // 纵向匹配
-            const rows = this.checkMatch(row, col, false)
+            const rows = this.checkMatch(list, row, col, false)
             matches = matches.concat(cols, rows)
         }
-        return matches.length > 0
+        return matches
+    }
+
+    checkMatch(list: ChessBoard, row: number, col: number, horizontal: boolean) {
+        const matches = [[row, col]]
+        const current = list[row][col].value
+        let i = 1
+        if (horizontal) {
+            // 往左遍历
+            while (col - i >= 0 && list[row][col - i].value === current) {
+                matches.push([row, col - i])
+                i++
+            }
+            i = 1
+            // 往右遍历
+            while (col + i < list[row].length && list[row][col + i].value === current) {
+                matches.push([row, col + i])
+                i++
+            }
+        } else {
+            // 往上遍历
+            while (row - i >= 0 && list[row - i][col].value === current) {
+                matches.push([row - i, col])
+                i++
+            }
+            i = 1
+            // 往下遍历
+            while (row + i < list.length && list[row + i][col].value === current) {
+                matches.push([row + i, col])
+                i++
+            }
+        }
+        return matches.length >= 3 ? matches : []
+    }
+
+    /**
+     * 消除棋子
+     */
+    removePieces = (list: ChessBoard, matches: number[][]) => {
+        for (const [row, col] of matches) {
+            list[row][col].value = null
+        }
+        this.handleChessboardChange(list as ChessBoard)
     }
 
     /**
      * 检查消除
      */
-    checkAndRemoveMatchesAt(pos: number[][], isSwap = false) {
+    _checkAndRemoveMatchesAt(pos: number[][], isSwap = false) {
         let matches: number[][] = []
         for (const [row, col] of pos) {
             // 横向匹配
-            const cols = this.checkMatch(row, col, true)
+            const cols = this._checkMatch(row, col, true)
             // 纵向匹配
-            const rows = this.checkMatch(row, col, false)
+            const rows = this._checkMatch(row, col, false)
             matches = matches.concat(cols, rows)
         }
 
@@ -183,16 +196,45 @@ export default class Xiaoxiaole {
         const movedPos = [...this.movePiecesDown(), ...this.refillAndCheck()]
         if (movedPos.length > 0) {
             console.log('消除并填充棋子后再次检查消除')
-            this.checkAndRemoveMatchesAt(movedPos)
+            this._checkAndRemoveMatchesAt(movedPos)
         } else {
             this.checkGameOver() && alert('游戏结束')
         }
     }
 
     /**
+     * 交换两个下标内容
+     */
+    _swapPiece([row1, col1]: [number, number], [row2, col2]: [number, number]) {
+        if (this.chessBoard[row1][col1].value === this.chessBoard[row2][col2].value) {
+            console.log('棋子相同，不进行交换')
+            return false
+        }
+
+        const arr = clone2DArray(this.chessBoard)
+        const temp = arr[row1][col1]
+        arr[row1][col1] = arr[row2][col2]
+        arr[row2][col2] = temp
+        this.chessBoard = arr as ChessBoard
+        this.handleChessboardChange(arr as ChessBoard)
+
+        console.log('交换后')
+        console.table([...arr].map(v => v.map(v => v.value)))
+        this._checkAndRemoveMatchesAt(
+            [
+                [row1, col1],
+                [row2, col2]
+            ] as unknown as number[][],
+            true
+        )
+
+        return true
+    }
+
+    /**
      * 检查单个棋子
      */
-    checkMatch(row: number, col: number, horizontal: boolean) {
+    _checkMatch(row: number, col: number, horizontal: boolean) {
         const matches = [[row, col]]
         const current = this.chessBoard[row][col].value
         let i = 1
@@ -209,13 +251,13 @@ export default class Xiaoxiaole {
                 i++
             }
         } else {
-            // 往上
+            // 往上遍历
             while (row - i >= 0 && this.chessBoard[row - i][col].value === current) {
                 matches.push([row - i, col])
                 i++
             }
             i = 1
-            // 往下
+            // 往下遍历
             while (row + i < this.chessBoard.length && this.chessBoard[row + i][col].value === current) {
                 matches.push([row + i, col])
                 i++

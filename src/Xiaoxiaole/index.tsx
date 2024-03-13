@@ -11,6 +11,14 @@ export const width = 50
 export const padding = 4
 export const idPrefix = 'piece-'
 
+function wait(time = 0): Promise<void> {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve()
+        }, time)
+    })
+}
+
 const _Xiaoxiaole = () => {
     const [chessBoard, setChessBoard] = useState<ChessBoard>([])
     const [selectedPiece, setSelectedPiece] = useState<Required<Piece> | null>(null)
@@ -43,7 +51,8 @@ const _Xiaoxiaole = () => {
         return {}
     }
 
-    const playAnimation = (piece: Piece, rowIndex: number, colIndex: number, reverse = true) => {
+    // 执行交换棋子动画
+    const playExchangeAnimation = (piece: Piece, rowIndex: number, colIndex: number, reverse = true) => {
         if (!selectedPiece) {
             return
         }
@@ -61,33 +70,73 @@ const _Xiaoxiaole = () => {
         })
     }
 
-    const handleSwapPiece = contextSafe((piece: Piece, rowIndex: number, colIndex: number) => {
+    // 执行消除棋子动画
+    const playRemoveAnimation = async (list: ChessBoard, matchedPieces: number[][]) => {
+        for (const [row, col] of matchedPieces) {
+            gsap.to(`#${idPrefix}${list[row][col].id}`, {
+                opacity: 0,
+                scale: 0,
+                display: 'none',
+                onComplete: () => {
+                    const target = document.querySelector(`#${idPrefix}${list[row][col].id}`)
+                    target?.parentElement?.removeChild(target)
+                }
+            })
+        }
+    }
+
+    const handleSwapPiece = contextSafe(async (piece: Piece, rowIndex: number, colIndex: number) => {
         if (!selectedPiece) {
             console.log('还没选中过棋子')
             return setSelectedPiece({ ...piece, rowIndex, colIndex })
         }
+
         // 不是相连的棋子不处理
         if (rowIndex !== selectedPiece?.rowIndex && colIndex !== selectedPiece?.colIndex) {
-            console.log('不是相连的棋子不处理')
+            console.log('不是相连的棋子, 设置新选中的棋子')
+            return setSelectedPiece({ ...piece, rowIndex, colIndex })
+        }
+
+        if (selectedPiece.id === piece.id) {
+            console.log('选中了自己，不处理')
             return
         }
+
         // 值一样时
         if (piece.value === selectedPiece.value) {
             console.log('值一样，执行交换并还原动画')
             // 执行交换并还原动画
-            playAnimation(piece, rowIndex, colIndex)
+            playExchangeAnimation(piece, rowIndex, colIndex)
             setSelectedPiece(null)
             return
         }
+
         // 值不一样时，执行交换动画，如果交换后无法消除，则还原动画
         console.log('值不一样，执行交换动画')
-        const canMatch = window.xiaoxiaole.checkCanMatch([
-            [rowIndex, colIndex],
-            [selectedPiece.rowIndex, selectedPiece.colIndex]
+        // 执行消除动作时的动画操作的都应该时假交换后的数组
+        // 先进行假交换
+        const newChessBoard: ChessBoard = window.xiaoxiaole.swapPiece(
+            chessBoard,
+            [selectedPiece.rowIndex, selectedPiece.colIndex],
+            [rowIndex, colIndex]
+        )
+        // 根据交换后的数组检测是否能进行消除
+        const matchedPieces: number[][] = window.xiaoxiaole.checkMatchedPieces(newChessBoard, [
+            [selectedPiece.rowIndex, selectedPiece.colIndex],
+            [rowIndex, colIndex]
         ])
-        playAnimation(piece, rowIndex, colIndex, !canMatch)
+        const canRemove = matchedPieces.length > 0
+        console.log('是否可以进行消除', canRemove, matchedPieces)
+        playExchangeAnimation(piece, rowIndex, colIndex, !canRemove)
 
-        // window.xiaoxiaole.swapPiece([rowIndex, colIndex], [selectedPiece.rowIndex, selectedPiece.colIndex])
+        // 能消除的话就执行消除动画
+        if (canRemove) {
+            await wait(500)
+            playRemoveAnimation(newChessBoard, matchedPieces)
+            await wait(500)
+            window.xiaoxiaole.removePieces(newChessBoard, matchedPieces)
+        }
+
         setSelectedPiece(null)
     })
 
