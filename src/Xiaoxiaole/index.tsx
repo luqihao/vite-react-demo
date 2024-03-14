@@ -70,7 +70,7 @@ const _Xiaoxiaole = () => {
     }
 
     // 执行交换棋子动画
-    const playExchangeAnimation = (piece: Piece, rowIndex: number, colIndex: number, reverse = true) => {
+    const playSwapAnimation = (piece: Piece, rowIndex: number, colIndex: number, reverse = true) => {
         if (!selectedPiece) {
             return
         }
@@ -103,12 +103,60 @@ const _Xiaoxiaole = () => {
         }
         await wait(60)
         const [row, col] = pos
-        gsap.to(`#${idPrefix}${list[row][col].id}`, {
-            opacity: 0.3,
-            scale: 0.3,
-            onComplete: () => {
-                isMoving.current = false
-            }
+
+        return new Promise(resolve =>
+            gsap.to(`#${idPrefix}${list[row][col].id}`, {
+                opacity: 0,
+                scale: 0,
+                onComplete: () => {
+                    isMoving.current = false
+                    resolve(0)
+                }
+            })
+        )
+    }
+
+    // 执行上方棋子下落动画
+    const playDownAnimation = async (list: ChessBoard, pos: number[], nullCount: number) => {
+        isMoving.current = true
+        const [row, col] = pos
+        return new Promise(resolve =>
+            gsap.to(`#${idPrefix}${list[row][col].id}`, {
+                translateY: nullCount * width,
+                ease: 'bounce.out',
+                onComplete: () => {
+                    isMoving.current = false
+                    resolve(0)
+                }
+            })
+        )
+    }
+
+    // 执行补充棋子下落动画
+    const playFillAnimation = async (list: ChessBoard, pos: number[]) => {
+        isMoving.current = true
+        const [i, j] = pos
+        return new Promise(resolve => {
+            const id = `${idPrefix}${list[i][j].id}`
+            const t = gsap.fromTo(
+                `#${id}`,
+                {
+                    opacity: 0,
+                    scale: 0
+                },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    ease: 'bounce.out',
+                    onComplete: () => {
+                        isMoving.current = false
+                        t.revert()
+                        // const target = document.getElementById(`${id}`)
+                        // target && (target.style.display = 'flex')
+                        resolve(0)
+                    }
+                }
+            )
         })
     }
 
@@ -137,7 +185,7 @@ const _Xiaoxiaole = () => {
         if (piece.value === selectedPiece.value) {
             console.log('值一样，执行交换并还原动画')
             // 执行交换并还原动画
-            playExchangeAnimation(piece, rowIndex, colIndex)
+            playSwapAnimation(piece, rowIndex, colIndex)
             setSelectedPiece(null)
             return
         }
@@ -158,7 +206,7 @@ const _Xiaoxiaole = () => {
         ])
         const canRemove = matchedPieces.length > 0
         console.log('是否可以进行消除', canRemove, matchedPieces)
-        playExchangeAnimation(piece, rowIndex, colIndex, !canRemove)
+        playSwapAnimation(piece, rowIndex, colIndex, !canRemove)
 
         // 能消除的话就执行消除动画
         if (canRemove) {
@@ -178,7 +226,9 @@ const _Xiaoxiaole = () => {
             col,
             handleChessboardChange: setChessBoard,
             handleGameOver: () => alert('游戏结束'),
-            handleRemovePiece: playRemoveAnimation
+            handleRemovePiece: playRemoveAnimation,
+            handleDownPiece: playDownAnimation,
+            handleFillPiece: playFillAnimation
         })
     }, [])
 

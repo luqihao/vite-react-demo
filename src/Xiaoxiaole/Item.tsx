@@ -22,7 +22,10 @@ const Item = ({ col, colIndex, rowIndex, selectedPiece, handlePieceClick, mounte
                 // data-row={rowIndex}
                 // data-col={colIndex}
                 className="box w-full h-full text-white flex items-center justify-center"
-                style={{ background: col.value ? colors[col.value - 1] : '#fff', display: mounted ? 'flex' : 'none' }}
+                style={{
+                    background: col.value ? colors[col.value - 1] : '#000',
+                    display: mounted && !col?.isFill ? 'flex' : 'none'
+                }}
             >
                 {/* {rowIndex}-{colIndex} */}
                 {col.id}
