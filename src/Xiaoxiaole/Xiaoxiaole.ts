@@ -191,9 +191,9 @@ export default class Xiaoxiaole {
         console.log('matches', matches)
         for (const [row, col] of matches) {
             this.handleRemovePiece?.(arr, [row, col])
-            setTimeout(() => {
-                arr[row][col].value = null
-            }, 500)
+            // setTimeout(() => {
+            //     arr[row][col].value = null
+            // }, 500)
         }
 
         this.chessBoard = arr as ChessBoard

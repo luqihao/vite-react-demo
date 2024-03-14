@@ -35,7 +35,7 @@ const _Xiaoxiaole = () => {
         }
         for (let i = 0; i < row; i++) {
             for (let j = 0; j < col; j++) {
-                gsap.fromTo(
+                const t = gsap.fromTo(
                     `#${idPrefix}${chessBoard[i][j].id}`,
                     {
                         opacity: 0,
@@ -45,7 +45,10 @@ const _Xiaoxiaole = () => {
                         opacity: 1,
                         y: 0,
                         delay: (row + (col ? col : 0) - (j + i)) * 0.1,
-                        ease: 'bounce.out'
+                        ease: 'bounce.out',
+                        onComplete: () => {
+                            t.revert()
+                        }
                     }
                 )
             }
@@ -87,17 +90,17 @@ const _Xiaoxiaole = () => {
 
     // 执行消除棋子动画
     const playRemoveAnimation = async (list: ChessBoard, pos: number[]) => {
-        const [row, col] = pos
         if (animationList.current.length > 0) {
             animationList.current.forEach((animate: gsap.core.Tween) => {
-                animate.reverse(0)
+                animate.revert()
             })
             animationList.current = []
         }
-        await wait(16)
+        await wait(60)
+        const [row, col] = pos
         gsap.to(`#${idPrefix}${list[row][col].id}`, {
             opacity: 0.3,
-            scale: 0.5
+            scale: 0.3
         })
     }
 
@@ -170,8 +173,7 @@ const _Xiaoxiaole = () => {
     }, [])
 
     return (
-        <div>
-            <h1 className="text-center text-[40px] mb-[100px]">消消乐</h1>
+        <div className="pt-[200px]">
             <div ref={container} className="overflow-hidden mx-auto flex flex-wrap" style={{ width: row * width }}>
                 {chessBoard.map((row: Piece[], rowIndex: number) => {
                     return row.map((col: Piece, colIndex: number) => {
