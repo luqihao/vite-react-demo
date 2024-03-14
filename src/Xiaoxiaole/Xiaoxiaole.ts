@@ -1,10 +1,3 @@
-interface IOptions {
-    row: number
-    col: number
-    handleChessboardChange: (arr: ChessBoard) => void
-    handleGameOver: () => void
-    handleRemovePiece: (list: ChessBoard, pos: number[]) => void
-}
 export type Piece = { id: number; value: number | null; rowIndex?: number; colIndex?: number }
 export type ChessBoard = Piece[][]
 
@@ -20,6 +13,14 @@ function clone2DArray(arr: unknown[][]): ChessBoard {
         clone.push(subArr)
     }
     return clone as ChessBoard
+}
+
+interface IOptions {
+    row: number
+    col: number
+    handleChessboardChange: (arr: ChessBoard) => void
+    handleGameOver: () => void
+    handleRemovePiece: (list: ChessBoard, pos: number[]) => void
 }
 
 export default class Xiaoxiaole {

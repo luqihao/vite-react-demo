@@ -24,6 +24,7 @@ const _Xiaoxiaole = () => {
     const [selectedPiece, setSelectedPiece] = useState<Required<Piece> | null>(null)
     const [mounted, setMounted] = useState<boolean>(false)
     const animationList = useRef<gsap.core.Tween[]>([])
+    const isMoving = useRef<boolean>(false)
 
     const container = useRef<HTMLDivElement>(null)
 
@@ -73,16 +74,19 @@ const _Xiaoxiaole = () => {
         if (!selectedPiece) {
             return
         }
+        isMoving.current = true
         const t1 = gsap.to(`#${idPrefix}${selectedPiece.id}`, {
             ...moveDistance([selectedPiece.rowIndex || 0, selectedPiece.colIndex || 0], [rowIndex, colIndex]),
             onComplete: () => {
                 reverse && t1.reverse(0)
+                isMoving.current = false
             }
         })
         const t2 = gsap.to(`#${idPrefix}${piece.id}`, {
             ...moveDistance([rowIndex, colIndex], [selectedPiece?.rowIndex || 0, selectedPiece?.colIndex || 0]),
             onComplete: () => {
                 reverse && t2.reverse(0)
+                isMoving.current = false
             }
         })
         animationList.current = [t1, t2]
@@ -90,6 +94,7 @@ const _Xiaoxiaole = () => {
 
     // 执行消除棋子动画
     const playRemoveAnimation = async (list: ChessBoard, pos: number[]) => {
+        isMoving.current = true
         if (animationList.current.length > 0) {
             animationList.current.forEach((animate: gsap.core.Tween) => {
                 animate.revert()
@@ -100,11 +105,18 @@ const _Xiaoxiaole = () => {
         const [row, col] = pos
         gsap.to(`#${idPrefix}${list[row][col].id}`, {
             opacity: 0.3,
-            scale: 0.3
+            scale: 0.3,
+            onComplete: () => {
+                isMoving.current = false
+            }
         })
     }
 
-    const handleSwapPiece = async (piece: Piece, rowIndex: number, colIndex: number) => {
+    const handlePieceClick = async (piece: Piece, rowIndex: number, colIndex: number) => {
+        if (isMoving.current) {
+            return
+        }
+
         if (!selectedPiece) {
             console.log('还没选中过棋子')
             return setSelectedPiece({ ...piece, rowIndex, colIndex })
@@ -151,8 +163,6 @@ const _Xiaoxiaole = () => {
         // 能消除的话就执行消除动画
         if (canRemove) {
             await wait(500)
-            // playRemoveAnimation(newChessBoard, matchedPieces)
-            // await wait(500)
             window.xiaoxiaole._swapPiece([selectedPiece.rowIndex, selectedPiece.colIndex], [rowIndex, colIndex])
         }
 
@@ -184,7 +194,7 @@ const _Xiaoxiaole = () => {
                                 rowIndex={rowIndex}
                                 colIndex={colIndex}
                                 selectedPiece={selectedPiece}
-                                handleSwapPiece={handleSwapPiece}
+                                handlePieceClick={handlePieceClick}
                                 mounted={mounted}
                             />
                         )
