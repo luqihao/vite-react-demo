@@ -22,7 +22,8 @@ const Item = ({ col, colIndex, rowIndex, selectedPiece, handlePieceClick, mounte
                 className="box w-full h-full text-white flex items-center justify-center"
                 style={{
                     background: col.value ? colors[col.value - 1] : '#fff',
-                    display: mounted && !col?.isFill ? 'flex' : 'none'
+                    display: mounted ? 'flex' : 'none',
+                    opacity: col?.isFill ? 0 : 1
                 }}
             >
                 {/* {rowIndex}-{colIndex} */}

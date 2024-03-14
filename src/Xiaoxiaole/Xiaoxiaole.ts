@@ -322,7 +322,7 @@ export default class Xiaoxiaole {
     /**
      * 重新填充和检查棋子
      */
-    refillAndCheck() {
+    async refillAndCheck() {
         const movedPos: number[][] = []
         const arr = clone2DArray(this.chessBoard)
         for (let row = 0; row < arr.length; row++) {
@@ -330,8 +330,8 @@ export default class Xiaoxiaole {
                 if (arr[row][col].value === null) {
                     arr[row][col] = {
                         id: this.index,
-                        value: this.getRandomPiece()
-                        // , isFill: true
+                        value: this.getRandomPiece(),
+                        isFill: true
                     }
                     this.index++
                     movedPos.push([row, col])
@@ -344,9 +344,18 @@ export default class Xiaoxiaole {
         console.log('补充后的棋子')
         console.table([...arr].map(v => v.map(v => v.value)))
 
+        await wait(100)
         for (const [row, col] of movedPos) {
             this.handleFillPiece(arr, [row, col])
         }
+
+        setTimeout(() => {
+            const arr = clone2DArray(this.chessBoard)
+            for (const [row, col] of movedPos) {
+                delete arr[row][col].isFill
+            }
+            this.chessBoard = arr as ChessBoard
+        }, 500)
 
         return movedPos
     }

@@ -144,8 +144,8 @@ const _Xiaoxiaole = () => {
                 onComplete: () => {
                     isMoving.current = false
                     t.revert()
-                    // const target = document.getElementById(`${id}`)
-                    // target && (target.style.display = 'flex')
+                    const target = document.getElementById(`${id}`)
+                    target && (target.style.opacity = '1')
                 }
             }
         )
