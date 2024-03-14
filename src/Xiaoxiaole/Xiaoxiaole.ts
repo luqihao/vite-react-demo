@@ -22,9 +22,9 @@ interface IOptions {
     col: number
     handleChessboardChange: (arr: ChessBoard) => void
     handleGameOver: () => void
-    handleRemovePiece: (list: ChessBoard, pos: number[]) => Promise<unknown>
-    handleDownPiece: (list: ChessBoard, pos: number[], nullCount: number) => Promise<unknown>
-    handleFillPiece: (list: ChessBoard, pos: number[]) => Promise<unknown>
+    handleRemovePiece: (list: ChessBoard, pos: number[]) => unknown
+    handleDownPiece: (list: ChessBoard, pos: number[], nullCount: number) => unknown
+    handleFillPiece: (list: ChessBoard, pos: number[]) => unknown
 }
 
 export default class Xiaoxiaole {
@@ -36,9 +36,9 @@ export default class Xiaoxiaole {
     col: number = 0
     handleGameOver = () => console.log('游戏结束')
     handleChessboardChange: (arr: ChessBoard) => void
-    handleRemovePiece: (list: ChessBoard, pos: number[]) => Promise<unknown>
-    handleDownPiece: (list: ChessBoard, pos: number[], nullCount: number) => Promise<unknown>
-    handleFillPiece: (list: ChessBoard, pos: number[]) => Promise<unknown>
+    handleRemovePiece: (list: ChessBoard, pos: number[]) => unknown
+    handleDownPiece: (list: ChessBoard, pos: number[], nullCount: number) => unknown
+    handleFillPiece: (list: ChessBoard, pos: number[]) => unknown
     index: number = 1
 
     constructor({
@@ -205,9 +205,13 @@ export default class Xiaoxiaole {
 
         // 消除
         console.table([...arr].map(v => v.map(v => v.id)))
-        console.log('matches', matches)
+        // 先执行动画
         for (const [row, col] of matches) {
-            await this.handleRemovePiece?.(arr, [row, col])
+            this.handleRemovePiece?.(arr, [row, col])
+        }
+        await wait(500)
+        // 再更改数组
+        for (const [row, col] of matches) {
             arr[row][col].value = null
         }
 
@@ -301,13 +305,15 @@ export default class Xiaoxiaole {
                 if (piece === null) {
                     nullCount++
                 } else if (nullCount > 0) {
-                    await this.handleDownPiece(arr, [row, col], nullCount)
+                    this.handleDownPiece(arr, [row, col], nullCount)
                     arr[row + nullCount][col] = arr[row][col]
                     arr[row][col] = { ...arr[row][col], value: null }
                     movedPos.push([row + nullCount, col])
                 }
             }
         }
+
+        await wait(500)
         this.chessBoard = arr as ChessBoard
         this.handleChessboardChange(arr as ChessBoard)
         return movedPos
@@ -316,7 +322,7 @@ export default class Xiaoxiaole {
     /**
      * 重新填充和检查棋子
      */
-    async refillAndCheck() {
+    refillAndCheck() {
         const movedPos: number[][] = []
         const arr = clone2DArray(this.chessBoard)
         for (let row = 0; row < arr.length; row++) {
@@ -338,10 +344,10 @@ export default class Xiaoxiaole {
         console.log('补充后的棋子')
         console.table([...arr].map(v => v.map(v => v.value)))
 
-        await wait(100)
         for (const [row, col] of movedPos) {
-            await this.handleFillPiece(arr, [row, col])
+            this.handleFillPiece(arr, [row, col])
         }
+
         return movedPos
     }
 

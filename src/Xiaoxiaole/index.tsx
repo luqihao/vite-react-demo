@@ -21,7 +21,7 @@ export function wait(time = 0): Promise<void> {
 
 const _Xiaoxiaole = () => {
     const [chessBoard, setChessBoard] = useState<ChessBoard>([])
-    const [selectedPiece, setSelectedPiece] = useState<Required<Piece> | null>(null)
+    const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null)
     const [mounted, setMounted] = useState<boolean>(false)
     const animationList = useRef<gsap.core.Tween[]>([])
     const isMoving = useRef<boolean>(false)
@@ -104,60 +104,51 @@ const _Xiaoxiaole = () => {
         await wait(60)
         const [row, col] = pos
 
-        return new Promise(resolve =>
-            gsap.to(`#${idPrefix}${list[row][col].id}`, {
-                opacity: 0,
-                scale: 0,
-                onComplete: () => {
-                    isMoving.current = false
-                    resolve(0)
-                }
-            })
-        )
+        gsap.to(`#${idPrefix}${list[row][col].id}`, {
+            opacity: 0,
+            scale: 0,
+            onComplete: () => {
+                isMoving.current = false
+            }
+        })
     }
 
     // 执行上方棋子下落动画
-    const playDownAnimation = async (list: ChessBoard, pos: number[], nullCount: number) => {
+    const playDownAnimation = (list: ChessBoard, pos: number[], nullCount: number) => {
         isMoving.current = true
         const [row, col] = pos
-        return new Promise(resolve =>
-            gsap.to(`#${idPrefix}${list[row][col].id}`, {
-                translateY: nullCount * width,
-                ease: 'bounce.out',
-                onComplete: () => {
-                    isMoving.current = false
-                    resolve(0)
-                }
-            })
-        )
+        gsap.to(`#${idPrefix}${list[row][col].id}`, {
+            translateY: nullCount * width,
+            ease: 'bounce.out',
+            onComplete: () => {
+                isMoving.current = false
+            }
+        })
     }
 
     // 执行补充棋子下落动画
-    const playFillAnimation = async (list: ChessBoard, pos: number[]) => {
+    const playFillAnimation = (list: ChessBoard, pos: number[]) => {
         isMoving.current = true
         const [i, j] = pos
-        return new Promise(resolve => {
-            const id = `${idPrefix}${list[i][j].id}`
-            const t = gsap.fromTo(
-                `#${id}`,
-                {
-                    opacity: 0,
-                    scale: 0
-                },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    ease: 'bounce.out',
-                    onComplete: () => {
-                        isMoving.current = false
-                        t.revert()
-                        // const target = document.getElementById(`${id}`)
-                        // target && (target.style.display = 'flex')
-                        resolve(0)
-                    }
+        const id = `${idPrefix}${list[i][j].id}`
+        const t = gsap.fromTo(
+            `#${id}`,
+            {
+                opacity: 0,
+                scale: 0
+            },
+            {
+                opacity: 1,
+                scale: 1,
+                ease: 'bounce.out',
+                onComplete: () => {
+                    isMoving.current = false
+                    t.revert()
+                    // const target = document.getElementById(`${id}`)
+                    // target && (target.style.display = 'flex')
                 }
-            )
-        })
+            }
+        )
     }
 
     const handlePieceClick = async (piece: Piece, rowIndex: number, colIndex: number) => {
