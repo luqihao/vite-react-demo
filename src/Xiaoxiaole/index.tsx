@@ -5,8 +5,8 @@ import { gsap } from 'gsap'
 import Xiaoxiaole, { ChessBoard, Piece } from './Xiaoxiaole'
 import Item from './Item'
 
-export const row = 6
-export const col = 6
+export const row = 5
+export const col = 5
 export const width = 50
 export const padding = 4
 export const idPrefix = 'piece-'
@@ -196,10 +196,8 @@ const _Xiaoxiaole = () => {
         }
 
         // 值不一样时，执行交换动画，如果交换后无法消除，则还原动画
-        console.log('值不一样，执行交换动画')
-        // 执行消除动作时的动画操作的都应该时假交换后的数组
         // 先进行假交换
-        const newChessBoard: ChessBoard = window.xiaoxiaole.swapPiece(
+        const newChessBoard: ChessBoard = window.xiaoxiaole._swapPiece(
             chessBoard,
             [selectedPiece.rowIndex, selectedPiece.colIndex],
             [rowIndex, colIndex]
@@ -215,8 +213,13 @@ const _Xiaoxiaole = () => {
 
         // 能消除的话就执行消除动画
         if (canRemove) {
-            await wait(500)
-            window.xiaoxiaole._swapPiece([selectedPiece.rowIndex, selectedPiece.colIndex], [rowIndex, colIndex])
+            await wait(250)
+            window.xiaoxiaole.swapPiece(
+                [selectedPiece.rowIndex, selectedPiece.colIndex],
+                [rowIndex, colIndex],
+                newChessBoard,
+                matchedPieces
+            )
         }
 
         setSelectedPiece(null)
@@ -230,7 +233,9 @@ const _Xiaoxiaole = () => {
             row,
             col,
             handleChessboardChange: setChessBoard,
-            handleGameOver: () => alert('游戏结束'),
+            handleGameOver: () => {
+                alert('游戏结束'), window.xiaoxiaole.initChessBoard(row, col)
+            },
             handleRemovePiece: playRemoveAnimation,
             handleDownPiece: playDownAnimation,
             handleFillPiece: playFillAnimation
