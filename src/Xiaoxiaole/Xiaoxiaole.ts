@@ -209,7 +209,7 @@ export default class Xiaoxiaole {
         for (const [row, col] of matches) {
             this.handleRemovePiece?.(arr, [row, col])
         }
-        await wait(500)
+        await wait(250)
         // 再更改数组
         for (const [row, col] of matches) {
             arr[row][col].value = null
@@ -222,6 +222,7 @@ export default class Xiaoxiaole {
         const movedPos = [...(await this.movePiecesDown()), ...(await this.refillAndCheck())]
         if (movedPos.length > 0) {
             console.log('消除并填充棋子后再次检查消除')
+            await wait(250)
             this._checkAndRemoveMatchesAt(movedPos)
         } else {
             this.checkGameOver() && alert('游戏结束')
@@ -313,7 +314,7 @@ export default class Xiaoxiaole {
             }
         }
 
-        await wait(500)
+        await wait(250)
         this.chessBoard = arr as ChessBoard
         this.handleChessboardChange(arr as ChessBoard)
         return movedPos
@@ -355,7 +356,7 @@ export default class Xiaoxiaole {
                 delete arr[row][col].isFill
             }
             this.chessBoard = arr as ChessBoard
-        }, 500)
+        }, 250)
 
         return movedPos
     }

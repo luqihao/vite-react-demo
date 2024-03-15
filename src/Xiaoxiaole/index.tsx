@@ -11,6 +11,10 @@ export const width = 50
 export const padding = 4
 export const idPrefix = 'piece-'
 
+gsap.defaults({
+    duration: 0.25
+})
+
 export function wait(time = 0): Promise<void> {
     return new Promise(resolve => {
         setTimeout(() => {
@@ -19,9 +23,13 @@ export function wait(time = 0): Promise<void> {
     })
 }
 
+type CustomRequired<T, K extends keyof T> = {
+    [P in K]-?: T[P]
+} & Omit<T, K>
+
 const _Xiaoxiaole = () => {
     const [chessBoard, setChessBoard] = useState<ChessBoard>([])
-    const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null)
+    const [selectedPiece, setSelectedPiece] = useState<CustomRequired<Piece, 'rowIndex' | 'colIndex'> | null>(null)
     const [mounted, setMounted] = useState<boolean>(false)
     const animationList = useRef<gsap.core.Tween[]>([])
     const isMoving = useRef<boolean>(false)
@@ -161,18 +169,24 @@ const _Xiaoxiaole = () => {
             return setSelectedPiece({ ...piece, rowIndex, colIndex })
         }
 
-        // 不是相连的棋子不处理
-        if (rowIndex !== selectedPiece?.rowIndex && colIndex !== selectedPiece?.colIndex) {
-            console.log('不是相连的棋子, 设置新选中的棋子')
-            return setSelectedPiece({ ...piece, rowIndex, colIndex })
-        }
-
         if (selectedPiece.id === piece.id) {
             console.log('选中了自己，不处理')
             return
         }
 
-        // 值一样时
+        if (rowIndex !== selectedPiece.rowIndex && colIndex !== selectedPiece.colIndex) {
+            console.log('不同行或不同列， 设置新选中的棋子')
+            return setSelectedPiece({ ...piece, rowIndex, colIndex })
+        }
+
+        if (
+            (rowIndex === selectedPiece.rowIndex && Math.abs(colIndex - selectedPiece.colIndex) > 1) ||
+            (colIndex === selectedPiece.colIndex && Math.abs(rowIndex - selectedPiece.rowIndex) > 1)
+        ) {
+            console.log('同一行或同一列但不是相连的， 设置新选中的棋子')
+            return setSelectedPiece({ ...piece, rowIndex, colIndex })
+        }
+
         if (piece.value === selectedPiece.value) {
             console.log('值一样，执行交换并还原动画')
             // 执行交换并还原动画
