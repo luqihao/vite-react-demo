@@ -64,6 +64,7 @@ export default class Xiaoxiaole {
      * 初始化棋盘
      */
     initChessBoard(row: number, col: number) {
+        this.index = 1
         const arr = clone2DArray([])
         for (let i = 0; i < row; i++) {
             arr[i] = new Array(col)

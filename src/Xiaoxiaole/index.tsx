@@ -143,11 +143,11 @@ const _Xiaoxiaole = () => {
             `#${id}`,
             {
                 opacity: 0,
-                scale: 0
+                y: -width * (i + 1)
             },
             {
                 opacity: 1,
-                scale: 1,
+                y: 0,
                 ease: 'bounce.out',
                 onComplete: () => {
                     isMoving.current = false
@@ -234,7 +234,9 @@ const _Xiaoxiaole = () => {
             col,
             handleChessboardChange: setChessBoard,
             handleGameOver: () => {
-                alert('游戏结束'), window.xiaoxiaole.initChessBoard(row, col)
+                alert('游戏结束')
+                setMounted(false)
+                window.xiaoxiaole.initChessBoard(row, col)
             },
             handleRemovePiece: playRemoveAnimation,
             handleDownPiece: playDownAnimation,
