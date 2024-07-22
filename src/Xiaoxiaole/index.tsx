@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Xiaoxiaole, { ChessBoard } from './Xiaoxiaole'
 import Item from './Item'
 
-export const row = 5
+export const row = 6
 export const col = 5
 
 const _Xiaoxiaole = () => {

@@ -1,8 +1,8 @@
 import './App.css'
-import Xiaoxiaole from './Xiaoxiaole'
+import NewXiaoxiaole from './NewXiaoxiaole'
 
 function App() {
-    return <Xiaoxiaole />
+    return <NewXiaoxiaole />
 }
 
 export default App

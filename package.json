@@ -11,11 +11,13 @@
     },
     "dependencies": {
         "gsap": "^3.12.5",
+        "lodash-es": "^4.17.21",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
         "@gsap/react": "^2.1.0",
+        "@types/lodash-es": "^4.17.12",
         "@types/react": "^18.2.55",
         "@types/react-dom": "^18.2.19",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
