@@ -13,12 +13,14 @@ interface IOptions {
     row: number
     col: number
     pieceSize: number
+    restTime?: number
     handleScoreChange?: (score: number) => void
     handleComboChange?: (combo: number) => void
     handleMaxComboChange?: (combo: number) => void
     handleRecordChange?: (list: string[]) => void
     handleSummaryChange?: (list: number[]) => void
     handleGameOver?: () => void
+    handleRestTimeChange?: (restTime: number) => void
 }
 
 type Piece = {
@@ -46,11 +48,11 @@ export default class Xiaoxiaole {
     // 棋盘容器
     container: HTMLElement | null = null
     // 棋盘尺寸-行数
-    row: number = 0
+    row: number = 5
     // 棋盘尺寸-列数
-    col: number = 0
+    col: number = 5
     // 棋子宽高
-    pieceSize: number = 0
+    pieceSize: number = 50
     // id递增
     index: number = 1
     // 总数
@@ -67,46 +69,61 @@ export default class Xiaoxiaole {
     record: string[] = []
     // 记录消除各棋子个数
     summary: number[] = []
-
     // 移动端触碰初始位置
     originPos = {
         startX: 0,
         startY: 0
     }
+    // 原始倒计时
+    originRestTime = 60
+    // 倒计时
+    restTime: number = 60
+    // 倒计时定时器
+    timer: number = 0
 
-    handleGameOver = () => {
-        alert('游戏结束')
+    _handleGameOver = () => {
+        if (this.running) {
+            return
+        }
+        alert(`游戏结束，你的最终得分是：${this.score}`)
+        this.handleGameOver()
         this.resetData()
     }
+    handleGameOver = () => console.log(`游戏结束，你的最终得分是：${this.score}`)
     handleScoreChange = (value: number) => console.log('当前分数：', value)
     handleComboChange = (value: number) => console.log('当前连击数：', value)
     handleMaxComboChange = (value: number) => console.log('最大连击数：', value)
-
+    handleRestTimeChange = (value: number) => console.log('剩余秒数：', value)
     handleRecordChange = (list: string[]) => console.log('当前消除记录：', list)
     handleSummaryChange = (list: number[]) => console.log('当前棋子消除个数汇总：', list)
 
     constructor({
         containerId,
-        row,
-        col,
+        row = 5,
+        col = 5,
         pieceSize,
+        restTime = 60,
         handleGameOver,
         handleScoreChange,
         handleComboChange,
         handleMaxComboChange,
         handleRecordChange,
-        handleSummaryChange
+        handleSummaryChange,
+        handleRestTimeChange
     }: IOptions) {
         handleGameOver && (this.handleGameOver = handleGameOver)
         handleScoreChange && (this.handleScoreChange = handleScoreChange)
         handleComboChange && (this.handleComboChange = handleComboChange)
         handleMaxComboChange && (this.handleMaxComboChange = handleMaxComboChange)
+        handleRestTimeChange && (this.handleRestTimeChange = handleRestTimeChange)
         handleRecordChange && (this.handleRecordChange = handleRecordChange)
         handleSummaryChange && (this.handleSummaryChange = handleSummaryChange)
         this.container = document.getElementById(containerId)
         this.row = row
         this.col = col
         this.pieceSize = pieceSize
+        this.restTime = restTime
+        this.originRestTime = restTime
         this.initChessBoard(row, col)
     }
 
@@ -129,6 +146,11 @@ export default class Xiaoxiaole {
         this.handleMaxComboChange(value)
     }
 
+    setRestTime = (value: number) => {
+        this.restTime = value
+        this.handleRestTimeChange(value)
+    }
+
     setRecord = (list: number[][]) => {
         const temp = list.map(v => {
             const value = this.chessBoard[v[0]][v[1]].value || 0
@@ -140,8 +162,24 @@ export default class Xiaoxiaole {
         this.handleSummaryChange(this.summary)
     }
 
+    gameStart = () => {
+        if (this.restTime > 0) {
+            this.timer = setInterval(() => {
+                if (this.restTime > 0) {
+                    this.setRestTime(this.restTime - 1)
+                } else {
+                    this._handleGameOver()
+                }
+            }, 1000)
+        } else {
+            this.handleRestTimeChange(Number.MAX_SAFE_INTEGER)
+        }
+    }
+
     // 重置游戏数据
     resetData = () => {
+        this.timer && clearInterval(this.timer)
+        this.restTime = this.originRestTime
         this.chessBoard.flat().forEach(v => {
             if (isMobile) {
                 v.ele.removeEventListener('touchstart', this.handleTouchStart)
@@ -254,6 +292,9 @@ export default class Xiaoxiaole {
         this.selectedPiece.ele.style.borderColor = '#fff'
         this.selectedPiece = null
         this.running = false
+        if (this.restTime === 0 && this.originRestTime !== 0) {
+            this._handleGameOver()
+        }
     }
 
     handleClick = async (e: Event) => {
@@ -338,6 +379,12 @@ export default class Xiaoxiaole {
             startX: 0,
             startY: 0
         }
+    }
+
+    // 生成随机棋子值
+    getRandomPiece(): number {
+        const randomIndex = Math.floor(Math.random() * this.chessPieces.length)
+        return this.chessPieces[randomIndex]
     }
 
     /**
@@ -481,7 +528,7 @@ export default class Xiaoxiaole {
 
         if (matches.length < 1) {
             this.setCombo(0)
-            this.checkGameOver() && this.handleGameOver()
+            this.checkGameOver() && this._handleGameOver()
             return
         }
 
@@ -508,14 +555,8 @@ export default class Xiaoxiaole {
             await this.checkAndRemoveMatchesAt(movedPos)
         } else {
             this.setCombo(0)
-            this.checkGameOver() && this.handleGameOver()
+            this.checkGameOver() && this._handleGameOver()
         }
-    }
-
-    // 生成随机棋子值
-    getRandomPiece(): number {
-        const randomIndex = Math.floor(Math.random() * this.chessPieces.length)
-        return this.chessPieces[randomIndex]
     }
 
     // 交换棋子动画
@@ -674,6 +715,7 @@ export default class Xiaoxiaole {
                             ease: 'bounce.out',
                             onComplete: () => {
                                 if (i === 0 && j === 0) {
+                                    this.gameStart()
                                     resolve()
                                 }
                             }
