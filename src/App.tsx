@@ -1,8 +1,8 @@
 import './App.css'
-import NewXiaoxiaole from './NewXiaoxiaole'
+import Editor from './Editor'
 
 function App() {
-    return <NewXiaoxiaole />
+    return <Editor />
 }
 
 export default App

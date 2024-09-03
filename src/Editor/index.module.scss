@@ -1,0 +1,13 @@
+.editor-containter {
+    position: relative;
+    top: 300px;
+    left: 300px;
+}
+
+.editor-inner {
+    border: 1px solid #000;
+    width: 300px;
+    height: 200px;
+    padding: 4px;
+    overflow: auto;
+}

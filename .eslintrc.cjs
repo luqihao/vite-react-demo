@@ -8,6 +8,8 @@ module.exports = {
     rules: {
         'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
         'no-async-promise-executor': 'off',
-        '@typescript-eslint/no-explicit-any': 'off'
+        '@typescript-eslint/no-explicit-any': 'off',
+        'no-empty': 'off',
+        'no-extra-semi': 'off'
     }
 }
