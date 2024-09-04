@@ -1,10 +1,11 @@
-.emoji {
+.appleemoji {
+    background-repeat: no-repeat;
     background-size: 6000% 6000%;
     width: 18px;
     height: 18px;
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     user-select: text;
-    vertical-align: text-top;
     -webkit-text-fill-color: transparent;
-    overflow: hidden;
 }

@@ -7,12 +7,9 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
 
 import { Placeholder } from './components/Placeholder'
 import styles from './index.module.scss'
-import EmojiPlugin from './plugins/EmojiPlugin'
-import { EmojiNode } from './plugins/EmojiPlugin/node'
+import AppleEmojiPlugin from './plugins/AppleEmojiPlugin'
+import { AppleEmojiNode } from './plugins/AppleEmojiPlugin/node'
 
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
 function onError(error: Error) {
     console.error(error)
 }
@@ -21,7 +18,7 @@ const Editor = () => {
     const initialConfig: InitialConfigType = {
         namespace: 'yim-editor',
         onError,
-        nodes: [EmojiNode]
+        nodes: [AppleEmojiNode]
     }
 
     return (
@@ -39,7 +36,7 @@ const Editor = () => {
                 />
                 <HistoryPlugin />
                 <AutoFocusPlugin />
-                <EmojiPlugin />
+                <AppleEmojiPlugin />
             </div>
         </LexicalComposer>
     )

@@ -8,7 +8,7 @@ import { getEmojiClassname } from './utils'
 
 export type SerializedEmojiNode = SerializedTextNode
 
-export class EmojiNode extends TextNode {
+export class AppleEmojiNode extends TextNode {
     __value: string
     __className: string
 
@@ -16,8 +16,8 @@ export class EmojiNode extends TextNode {
         return 'emoji'
     }
 
-    static clone(node: EmojiNode): EmojiNode {
-        return new EmojiNode(node.__text, node.__key)
+    static clone(node: AppleEmojiNode): AppleEmojiNode {
+        return new AppleEmojiNode(node.__text, node.__key)
     }
 
     constructor(emojiText: string, key?: NodeKey) {
@@ -27,12 +27,12 @@ export class EmojiNode extends TextNode {
     }
 
     createDOM(config: EditorConfig): HTMLElement {
-        const dom = document.createElement('span')
+        // const dom = document.createElement('span')
         const inner = super.createDOM(config)
         inner.className = this.__className
         inner.style.backgroundImage = `url(${ImgEmoji})`
-        dom.appendChild(inner)
-        return dom
+        // dom.appendChild(inner)
+        return inner
     }
 
     updateDOM(prevNode: TextNode, dom: HTMLElement, config: EditorConfig): boolean {
@@ -44,7 +44,7 @@ export class EmojiNode extends TextNode {
         return false
     }
 
-    static importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
+    static importJSON(serializedNode: SerializedEmojiNode): AppleEmojiNode {
         const node = $createEmojiNode(serializedNode.text)
         node.setFormat(serializedNode.format)
         node.setDetail(serializedNode.detail)
@@ -61,11 +61,11 @@ export class EmojiNode extends TextNode {
     }
 }
 
-export function $isEmojiNode(node: LexicalNode | null | undefined): node is EmojiNode {
-    return node instanceof EmojiNode
+export function $isEmojiNode(node: LexicalNode | null | undefined): node is AppleEmojiNode {
+    return node instanceof AppleEmojiNode
 }
 
-export function $createEmojiNode(emojiText: string): EmojiNode {
-    const node = new EmojiNode(emojiText).setMode('token')
+export function $createEmojiNode(emojiText: string): AppleEmojiNode {
+    const node = new AppleEmojiNode(emojiText).setMode('token')
     return $applyNodeReplacement(node)
 }
