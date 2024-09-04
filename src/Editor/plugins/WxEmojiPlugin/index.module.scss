@@ -1,6 +1,6 @@
-.apple-emoji {
+.wx-emoji {
     background-repeat: no-repeat;
-    background-size: 6000% 6000%;
+    background-size: cover;
     width: 18px;
     height: 18px;
     display: inline-flex;
@@ -8,4 +8,6 @@
     align-items: center;
     user-select: text;
     -webkit-text-fill-color: transparent;
+    font-size: 0;
+    vertical-align: text-bottom;
 }

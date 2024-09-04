@@ -7,8 +7,10 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary'
 
 import { Placeholder } from './components/Placeholder'
 import styles from './index.module.scss'
-import AppleEmojiPlugin from './plugins/AppleEmojiPlugin'
-import { AppleEmojiNode } from './plugins/AppleEmojiPlugin/node'
+// import AppleEmojiPlugin from './plugins/AppleEmojiPlugin'
+import WxEmojiPlugin from './plugins/WxEmojiPlugin'
+// import { AppleEmojiNode } from './plugins/AppleEmojiPlugin/node'
+import { WxEmojiNode } from './plugins/WxEmojiPlugin/node'
 
 function onError(error: Error) {
     console.error(error)
@@ -18,7 +20,10 @@ const Editor = () => {
     const initialConfig: InitialConfigType = {
         namespace: 'yim-editor',
         onError,
-        nodes: [AppleEmojiNode]
+        nodes: [
+            WxEmojiNode
+            // , AppleEmojiNode
+        ]
     }
 
     return (
@@ -36,7 +41,8 @@ const Editor = () => {
                 />
                 <HistoryPlugin />
                 <AutoFocusPlugin />
-                <AppleEmojiPlugin />
+                <WxEmojiPlugin />
+                {/* <AppleEmojiPlugin /> */}
             </div>
         </LexicalComposer>
     )
